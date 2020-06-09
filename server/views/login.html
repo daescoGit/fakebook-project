@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+</head>
+<body>
+<!-- onsubmit return false = easy alt to prevent default -->
+  <form id="frmLogin" onsubmit="return false">
+    <input name="username" type="text" placeholder="username">
+    <input name="password" type="password" placeholder="password">
+    <button onclick="login()">log in</button>
+  </form>
+
+  <script>
+    async function login(){
+      let form = new FormData(document.querySelector("#frmLogin"))
+      let connection = await fetch("login", {
+        method:"POST",
+        body:form
+      })
+      let response = await connection.text()
+      localStorage.jwt = response
+      // location.href = "svelte page"
+    }
+  </script>
+</body>
+</html>

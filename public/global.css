@@ -1,0 +1,156 @@
+*{ margin: 0px; padding: 0px; box-sizing: border-box; }
+body{
+  width: 100%;
+  font-size: 1.1rem;
+  font-weight: 300;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: rgba(0, 0, 0, 0.02);
+}
+input{
+  width: 100%;
+  height: 2.5rem;
+  padding: 0px 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.3rem;
+  font-size: inherit;
+  font-weight: inherit;
+  font-family: inherit;
+  outline: none;
+}
+
+/* ############################## */
+.mini-profile{
+  display: grid;
+  grid-template-columns: 1fr 20fr;
+  grid-gap: 1rem;
+  position: relative;
+}
+.mini-profile div div:first-child{
+  font-weight: 400;
+}
+.mini-profile > img{
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+}
+
+/* ############################## */
+
+/* ############################## */
+
+
+
+/*
+main{
+  display: grid;
+  grid-template-columns: 10fr 20fr 10fr;
+  grid-gap: 1rem;
+
+  position: fixed;
+  top: 5rem;
+  left: 0px;
+  width: 100%;
+  padding: 0px 1vw;
+}
+main div.left{
+  display: grid;
+  align-content: center;
+  grid-gap: 1rem;
+}
+main div.left div.s2{
+  display: grid;
+  grid-template-columns: 1fr 100fr;
+  grid-gap: 2.4rem;
+}
+main div.left div.s2 i{
+  font-size: 2rem;
+}
+main div.middle{
+  display: grid;
+  height: calc(100vh - 5rem);
+  overflow-y: scroll;
+  padding-right: 1rem;
+  padding-bottom: 5rem;
+}
+main .mind{
+  width: 100%; 
+  padding: 1rem;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+  
+}
+main .mind > div:first-child{
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 1rem;
+}
+main .mind form input{
+  width: 100%;
+  background: rgba(0, 0, 0, 0.05);
+}
+main .mind > div:last-child{
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-items: center;
+
+  padding-top: 1rem;
+}
+main .photo{
+  color: #45bd62;
+}
+main .tag{
+  color: #1da1f2;
+}
+main .feel{
+  color: #f7b928;
+}
+main div.posts{
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 1rem;
+  margin-top: 1rem;
+}
+main div.post{
+  display: grid;
+  grid-gap: 1rem;
+  width: 100%; 
+  padding: 1rem;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
+}
+*/
+/* ############################## */
+/*
+main div.right{
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-gap: 1rem;
+
+  position: relative;
+  height: calc(100vh - 6rem);
+  overflow: hidden;
+  overflow-y: scroll;
+}
+*/
+
+/* width */
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
