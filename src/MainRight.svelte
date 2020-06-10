@@ -4,7 +4,7 @@
 
 <!-- ###################################### -->
 
-<div id="a" class="main-right" onmouseover="block()" onmouseout="unblock()">
+<div id="a" class="main-right">
 
     <div class="mini-profile">
     <img src="https://source.unsplash.com/random/50x55" alt="">

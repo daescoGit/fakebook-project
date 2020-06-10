@@ -6,7 +6,7 @@
 	
 	import {jData} from "./store.js"
 
-	// PASS JWT IN HEADERS INSTEAD OF GET
+	// PASS JWT IN HEADERS OR POST INSTEAD OF GET
 	// const getAllDataForThisUser = async () => {
 	// 	let connect = await fetch("http://localhost/getAllDataForThisUser")
 	// 	let resData = await connect.json()
@@ -17,8 +17,8 @@
 	// setInterval( () => { getAllDataForThisUser() }, 5000 )
 
 	// WITH SSE
-	// ADD JWT
-	let eventResource = new EventSource("http://localhost/getAllDataForThisUser")
+	// PASS JWT IN HEADERS OR POST INSTEAD OF GET
+	let eventResource = new EventSource("http://localhost/data?jwt="+localStorage.jwt)
 	// alt: use .onmessage
 	eventResource.addEventListener("message", function(event){
 		let resData = JSON.parse(event.data) // parse text to obj

@@ -4,7 +4,7 @@
 
 <!-- ###################################### -->
 
-<div class="main-left" onmouseover="block()" onmouseout="unblock()">
+<div class="main-left">
 
     <div class="group">
         <div>
