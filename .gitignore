@@ -1,5 +1,6 @@
 /node_modules/
 /public/build/
 /server/node_modules/
+todo.txt
 
 .DS_Store

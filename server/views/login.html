@@ -13,15 +13,25 @@
     <button onclick="login()">log in</button>
   </form>
 
+  <div id="incorrect"></div>
+
   <script>
+    // XSS, CSRF always escape/protect (svelte, react etc. auto escapes)
     async function login(){
       let form = new FormData(document.querySelector("#frmLogin"))
+      // pass form data to server login route
       let connection = await fetch("login", {
         method:"POST",
         body:form
       })
+      // grab token response and store in localStorage
       let response = await connection.text()
-      localStorage.jwt = response
+      console.log(response)
+      if(response == 'incorrect') {
+        document.getElementById("incorrect").innerHTML = "Incorrect credentials";
+      }else{
+        localStorage.jwt = response
+      }
       // location.href = "svelte page"
     }
   </script>

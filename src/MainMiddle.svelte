@@ -9,7 +9,7 @@
     <div class="mind">
       <div>
         <form>
-          <input type="text" placeholder="Santiago, what are you up to?">
+          <input type="text" placeholder="Username, what are you up to?">
         </form>
       </div>
       <div>

@@ -13,7 +13,7 @@
     // SHOULD BE PASSED IN FETCH HEADERS (POST) INSTEAD OF GET QUERY STRING
     async function getData(){
       let connection = await fetch("data?jwt="+localStorage.jwt)
-      let response = await connection.json()
+      let response = await connection.text()
       response = JSON.stringify(response)
       document.querySelector("#private").innerHTML = response
     }

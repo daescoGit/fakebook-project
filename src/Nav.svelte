@@ -19,7 +19,7 @@
 <nav>
     <div class="left">
         <div class="logo">
-        <i class="fas fa-hippo"></i> Hippos
+        <i class="fas fa-crow"></i> fakebook
         </div>
         <div>
         <form>
@@ -45,7 +45,7 @@
 
     <div class="right">
         <div>
-        Santiago        
+        USERNAME        
         </div>
         <div>
         <i class="fas fa-plus-circle"></i>
