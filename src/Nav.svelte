@@ -1,6 +1,7 @@
 <script>
-  import {jData} from "./store.js"
+  import { jData } from "./store.js"
   $: unreadMessagesCount = $jData.unreadMessages.length
+  $: unreadNotificationsCount = $jData.unreadPosts.length
 
   // MAKE WITH AJAX
   // setTimeout( function(){
@@ -45,7 +46,7 @@
 
     <div class="right">
         <div>
-        USERNAME        
+        {$jData.userName}        
         </div>
         <div>
         <i class="fas fa-plus-circle"></i>
@@ -56,7 +57,7 @@
         </div>
         <div>
         <i class="far fa-bell"></i> 
-        <div class="notification-counter">5</div>         
+        <div class="notification-counter">{unreadNotificationsCount}</div>         
         </div>
         <div>
         <i class="fas fa-user"></i>      

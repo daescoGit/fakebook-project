@@ -3,7 +3,9 @@ const app = express()
 const path = require("path")
 const formidable = require("formidable")
 var jwt = require('jsonwebtoken')
-// use Mongo client files
+// For insertions
+const ObjectID = require('mongodb').ObjectID
+// Use Mongo client files
 const mongoClient = require("mongodb").MongoClient
 // Point to the host URL
 const mongoUrl = "mongodb://localhost:27017"
@@ -11,11 +13,13 @@ const mongoUrl = "mongodb://localhost:27017"
 let db = ''
 let usersCollection = ''
 // Connect
+// Using connection pool = not needed to open new con in all routes
 mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, (err, response) => {
     if(err){console.log('Cannot connect to Mongo'); return}
     console.log('connected to mongo')
-    db = response.db("company")
+    db = response.db("fakebook")
     usersCollection = db.collection("users")
+    globalVersion = 0
 })
 
 // ANTI SERVER CRASH HERE (make snippet)
@@ -30,7 +34,6 @@ app.listen(80, err => {
 // ##################################
 
 app.get("/signup", (req, res) => {
-    // this is a static page example
     res.sendFile(path.join(__dirname, "views", "signup.html"))
 })
 
@@ -41,17 +44,29 @@ app.post("/signup", (req, res) => {
         form.parse(req, (err, fields, files) => {
             let username = fields.username
             let password = fields.password
-            usersCollection.insertOne({"name":username, "password":password}, (err, jMongoRes) => {
+            let email = fields.email
+            // password should be encrypted
+            usersCollection.insertOne({
+                "name":username,
+                "password":password,
+                "email":email,
+                "image": "",
+                "friends":[],
+                "friendRequests":[], 
+                "groups":[], 
+                "messages":[],
+                "unreadMessages":[],
+                "myPosts":[],
+                "unreadPosts":[]
+            }, (err, jMongoRes) => {
                 // naming res 'jMongoRes' to avoid outer res conflict
                 console.log(jMongoRes)
-                res.send(`${username} ${password} Inserted id: ${jMongoRes.insertedId}`)
+                res.redirect('/login?registered')
+                return
+                //res.send(`${username} ${password} Inserted id: ${jMongoRes.insertedId}`)
             })
         });
 
-        // usersCollection.find().toArray( (err, jMongoRes) => {
-        //     // naming res 'jMongoRes' to avoid outer res conflict
-        //     res.json(jMongoRes)
-        // })
     }catch(err){
         console.log("error message"); return
     }
@@ -68,7 +83,8 @@ app.post("/login", (req, res) => {
         const form = formidable({ multiples: true })
 
         form.parse(req, (err, fields, files) => {
-            let username = fields.username
+            //let username = fields.username
+            let username = new RegExp(fields.username, 'i') // case insensitive
             let password = fields.password
             // password should be encrypted
             usersCollection.findOne({"name":username, "password":password}, (err, jMongoRes) => {
@@ -85,8 +101,15 @@ app.post("/login", (req, res) => {
         });
      
     }catch(err){
+        console.log(err)
         res.status(500).send(err)
     }
+})
+
+// LOGOUT
+// ##################################
+app.get("/logout", (req, res) => {
+    res.sendFile(path.join(__dirname, "views", "logout.html"))
 })
  
 // ADMIN
@@ -95,95 +118,122 @@ app.get("/admin", (req, res) => {
     res.sendFile(path.join(__dirname, "views", "admin.html"))
 })
 
+// USER AUTH MIDDLEWARE
+// ##################################
+const verifyToken = (req, res, next) => {
+    try {
+        if(req.method === 'POST') {
+            //console.log(req.headers)
+            console.log(req.get('X-Custom-Header'));
+            jwt.verify(req.get('X-Custom-Header'), 'the jwt secret key', function(err, decoded) {
+                if(err || decoded == undefined){ 
+                    console.log('error in jwt:', err.message);
+                    res.status(500).send()   
+                    return              
+                }
+                //console.log(decoded)
+                console.log('middleware passed, token validated')
+                token = decoded
+                next()
+            }); 
+        // TODO: replace get query string (problematic with sse)
+        }else{
+            jwt.verify(req.query.jwt, 'the jwt secret key', function(err, decoded) {
+                if(err || decoded == undefined){ 
+                    console.log('error in jwt:', err.message);
+                    res.status(500).send()   
+                    return              
+                }
+                console.log('middleware passed, token validated')
+                token = decoded
+                next()
+            }); 
+        }
+    }catch (err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+}
+
 // USER PAGE
 // ##################################
 app.get("/profile", (req, res) => {
     res.sendFile(path.join(__dirname, "../public/index.html"))
 })
 
-// USER AUTH MIDDLEWARE
-// ##################################
-const isAuthenticated = (req, res, next) => {
-    let reqUser = req.query.jwt // will come from post request (req.query.jwt) // needs to be decoded or in header?
-    console.log(reqUser)
-    usersCollection.findOne({"name":reqUser}, (err, jMongoRes) => {
-        if(err) { console.log("Database error"); return}
-        if(jMongoRes==undefined){ res.send('incorrect'); return }
-        //res.send(jMongoRes.name)
-        console.log(jMongoRes.name)
-        if(reqUser==jMongoRes.name){ return next() }
-        return res.send("error")
-    })
-}
-
 // VERIFY & GET PROFILE PAGE DATA REQUEST WITH JWT
 // ##################################
-app.get("/data", (req, res) => {
-    // find "jwt" in request (querystring)
-    let theJWT = req.query.jwt
-  
-    jwt.verify(theJWT, 'the jwt secret key', function(err, decoded) {
-        if(err || decoded==undefined){
-            console.log('error in jwt'); 
-            res.status(500).json({"error":"error in jwt"}); 
-            return
-        }
+app.get("/sse-data", verifyToken, (req, res) => {
+    // increase global ver to force initial load
+    globalVersion++
+    //local client data version
+    var localVersion = 0
+    console.log(token)
 
-        //console.log(decoded)
-        let jData = {
-            "contacts":[],
-            "groups":[], 
-            "friendRequests":[{},{}], 
-            "unreadMessages":[
-                {"id":1, "body": "abc"}
-            ],
-            "unreadPosts":[
-                {"id":2, "title":"test"}
-            ]
-        }
-        // SSE
-        // .set = allow to set many headers (alt: .header)
-        res.set("Access-Control-Allow-Origin", "*") 
-        res.set("Content-type", "text/event-stream")
-
-        setInterval( () => {
-            res.status(200).write(`data: ${JSON.stringify(jData)}\n\n`)
-        }, 1000)
-    }); 
-})
-
-// GET ALL SINGLE USER DATA
-// ##################################
-app.get("/getAllDataForThisUser", (req, res) => {
-    // TODO: Connect to the DB and get all unread messages
-    // res.header("Access-Control-Allow-Origin", "*")
-    // let jData = {"friendRequests":[{},{}], "unreadMessages":[
-    //     {"id":1, "message":"a"},
-    //     {"id":2, "message":"b"},
-    //     {"id":3, "message":"c"},
-    // ]}
-    // res.status(200).json(jData)
-
-    // WITH  SSE
-    // .set = allow to set many headers (alt: .header)
-    res.set("Access-Control-Allow-Origin", "*") 
-    res.set("Content-type", "text/event-stream")
-
-    let jData = 
-    {
-        "friendRequests":[{},{}], 
-        "unreadMessages":[
-
-        ],
-        "unreadPosts":[
-            {"id":2, "title":"test"}
-        ]
-    }
+    // SSE
+    res.writeHead(200, {
+        "Content-type": "text/event-stream",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*",
+        "Cache-Control": "no-cache"
+    });
+    res.write('\n');
 
     // interval to override default interval
     // .write will not close connection (like .send)
     // SSE can only sent text (not obj)
     setInterval( () => {
-        res.status(200).write(`data: ${JSON.stringify(jData)}\n\n`)
-    }, 1000)
+        if(localVersion < globalVersion){
+            // TODO: skip/limit posts, try catch, strange version related bug
+            usersCollection.findOne({"name":token.name}, (err, jMongoRes) => {
+                if(err || jMongoRes==undefined){ console.log("Database object response error"); return }
+                //console.log(jMongoRes)
+                res.status(200).write(`data: ${JSON.stringify(jMongoRes)}\n\n`)
+                localVersion = globalVersion
+            })
+        }
+    }, 100)
+})
+
+// UPDATE DATA (post or patch or put?)
+// ##################################
+
+
+// USER POSTS
+// ##################################
+
+app.post("/posts", verifyToken, (req, res) => {
+
+    const form = formidable({ multiples: true });
+    form.parse(req, (err, fields, files) => {
+        let userId = token.id
+        let message = fields.message
+        // try catch
+        // own posts
+        usersCollection.findOneAndUpdate(
+            // id needs to be made into object
+            { _id: new ObjectID(userId) },
+            // $ = mongo command
+            { $push: { myPosts: { _id: userId, message } } },
+            (err, jMongoRes) => {
+                if(err){ res.json(err) }
+                //res.json(jMongoRes)
+                globalVersion++
+            }
+        )
+
+        // other's posts
+        usersCollection.updateMany(
+            {"friends":{$elemMatch:{ _id: userId }}},
+            { $push: { unreadPosts: { _id: userId, message:message } } },
+            (err, jMongoRes) => {
+                if(err){ res.json(err) }
+                res.json(jMongoRes)
+                globalVersion++
+            }          
+        )
+       // res.status(200).send("posted")
+
+        // )
+    });
 })

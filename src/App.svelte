@@ -4,27 +4,27 @@
 	import MainRight from "./MainRight.svelte"
 	import MainMiddle from "./MainMiddle.svelte"
 	
-	import {jData} from "./store.js"
+	import { jData } from "./store.js"
 
-	// PASS JWT IN HEADERS OR POST INSTEAD OF GET
-	// const getAllDataForThisUser = async () => {
-	// 	let connect = await fetch("http://localhost/getAllDataForThisUser")
-	// 	let resData = await connect.json()
-	// 	$jData.unreadMessages = [...resData.unreadMessages, ...$jData.unreadMessages]
-	// 	console.log(jData)
-	// }
-	
-	// setInterval( () => { getAllDataForThisUser() }, 5000 )
-
-	// WITH SSE
-	// PASS JWT IN HEADERS OR POST INSTEAD OF GET
-	let eventResource = new EventSource("http://localhost/data?jwt="+localStorage.jwt)
+	// SSE
+	// HOW TO PASS JWT IN HEADERS INSTEAD OF GET WITH SSE?
+	let eventResource = new EventSource("/sse-data?jwt="+localStorage.jwt)
 	// alt: use .onmessage
 	eventResource.addEventListener("message", function(event){
-		let resData = JSON.parse(event.data) // parse text to obj
-		$jData.unreadMessages = [...resData.unreadMessages, ...$jData.unreadMessages]
-		$jData.unreadPosts = [...resData.unreadPosts, ...$jData.unreadPosts]
-		//console.log(event.data)
+		try {
+			let resData = JSON.parse(event.data) // parse text to obj
+			//if(resData.unreadMessages != )
+			$jData.unreadMessages = [...resData.unreadMessages, ...$jData.unreadMessages]
+			$jData.unreadPosts = resData.unreadPosts
+			$jData.friends = resData.friends
+			$jData.posts = resData.myPosts
+			//console.log(resData.unreadPosts)
+			// not with sse?
+			$jData.userName = resData.name
+
+		}catch(err){
+			console.log("SSE connection error")
+		}
 	})
 </script>
 

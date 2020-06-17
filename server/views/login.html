@@ -16,10 +16,14 @@
   <div id="incorrect"></div>
 
   <script>
+    if(window.location.search == '?registered'){
+      document.getElementById("incorrect").innerHTML = "Registration successful!";
+    }
     // XSS, CSRF always escape/protect (svelte, react etc. auto escapes)
+    // todo: validation
     async function login(){
       let form = new FormData(document.querySelector("#frmLogin"))
-      // pass form data to server login route
+      // async fetch: init object (form) + await res(token)
       let connection = await fetch("login", {
         method:"POST",
         body:form
@@ -27,12 +31,13 @@
       // grab token response and store in localStorage
       let response = await connection.text()
       console.log(response)
+      // 'incorrect' = res from server
       if(response == 'incorrect') {
         document.getElementById("incorrect").innerHTML = "Incorrect credentials";
       }else{
         localStorage.jwt = response
+        location.href = "/profile"
       }
-      // location.href = "svelte page"
     }
   </script>
 </body>
