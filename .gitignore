@@ -2,5 +2,6 @@
 /public/build/
 /server/node_modules/
 todo.txt
+misc.txt
 
 .DS_Store
