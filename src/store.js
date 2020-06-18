@@ -11,6 +11,7 @@ export let jData = writable(
         "messages":[],
         "unreadMessages":[],
         "posts":[],
+        "friendPosts":[],
         "unreadPosts":[]
     }
 )

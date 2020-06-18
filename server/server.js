@@ -54,10 +54,10 @@ app.post("/signup", (req, res) => {
                 "friends":[],
                 "friendRequests":[], 
                 "groups":[], 
-                "messages":[],
-                "unreadMessages":[],
+                "myMessages":[],
+                "friendMessages":[],
                 "myPosts":[],
-                "unreadPosts":[]
+                "friendPosts":[]
             }, (err, jMongoRes) => {
                 // naming res 'jMongoRes' to avoid outer res conflict
                 console.log(jMongoRes)
@@ -68,7 +68,8 @@ app.post("/signup", (req, res) => {
         });
 
     }catch(err){
-        console.log("error message"); return
+        console.log(err)
+        res.status(500).send(err)
     }
 })
 
@@ -203,37 +204,67 @@ app.get("/sse-data", verifyToken, (req, res) => {
 // ##################################
 
 app.post("/posts", verifyToken, (req, res) => {
+    try{
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            let userId = token.id
+            let message = fields.message
+            let name = token.name
+            let media = fields.media
+            // own posts
+            usersCollection.findOneAndUpdate(
+                // id needs to be an object
+                { _id: new ObjectID(userId) },
+                // $ = mongo command
+                { $push: { myPosts: { userId, message, name, media } } },
+                (err, jMongoRes) => {
+                    if(err){ res.json(err) }
+                    //res.json(jMongoRes)
+                    globalVersion++
+                }
+            )
+    
+            // other's posts
+            usersCollection.updateMany(
+                {"friends":{$elemMatch:{ _id: userId }}},
+                { $push: { friendPosts: { userId, message, name, media } } },
+                (err, jMongoRes) => {
+                    if(err){ res.json(err) }
+                    res.json(jMongoRes)
+                    globalVersion++
+                }          
+            )
+        });
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
 
-    const form = formidable({ multiples: true });
-    form.parse(req, (err, fields, files) => {
-        let userId = token.id
-        let message = fields.message
-        // try catch
-        // own posts
-        usersCollection.findOneAndUpdate(
-            // id needs to be made into object
-            { _id: new ObjectID(userId) },
-            // $ = mongo command
-            { $push: { myPosts: { _id: userId, message } } },
-            (err, jMongoRes) => {
-                if(err){ res.json(err) }
-                //res.json(jMongoRes)
-                globalVersion++
-            }
-        )
+// TEST API USER POSTS
+// ##################################
 
-        // other's posts
-        usersCollection.updateMany(
-            {"friends":{$elemMatch:{ _id: userId }}},
-            { $push: { unreadPosts: { _id: userId, message:message } } },
-            (err, jMongoRes) => {
-                if(err){ res.json(err) }
-                res.json(jMongoRes)
-                globalVersion++
-            }          
-        )
-       // res.status(200).send("posted")
+app.post("/api-posts", (req, res) => {
+    try{
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            let userId = fields.friendId
+            let message = fields.message
+            let name = fields.name
 
-        // )
-    });
+            // other's posts
+            usersCollection.updateMany(
+                {"friends":{$elemMatch:{ _id: userId }}},
+                { $push: { friendPosts: { userId, message, name } } },
+                (err, jMongoRes) => {
+                    if(err){ res.json(err) }
+                    res.json(jMongoRes)
+                    globalVersion++
+                }          
+            )
+        });
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
 })

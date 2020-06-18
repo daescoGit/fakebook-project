@@ -22,9 +22,9 @@
       <div>
         <form on:submit|preventDefault id="frmNewPost">
           <input id="msg" type="text" name="message" placeholder="Hey {$jData.userName}, how's life?">
-          <input type="hidden" name="jwt" value="{localStorage.jwt}">
           <div id="optionals">
-            <div><i class="far fa-image photo"></i> Photo/Video</div>
+            <label for="media" id="media-label"><i class="far fa-image photo"></i> Image/Video</label>
+            <input type="file" name="media" id="media">
             <div><i class="fas fa-user-tag tag"></i> Tag Friend</div>
             <div><i class="fas fa-shoe-prints feel"></i> Feeling Lucky</div>
           </div>
@@ -133,6 +133,13 @@ div.main-middle div.post{
   background: white;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
+}
+#media {
+  display: none;
+}
+
+#media-label:hover {
+  cursor: pointer;
 }
 
 </style>

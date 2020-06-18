@@ -14,8 +14,20 @@
 		try {
 			let resData = JSON.parse(event.data) // parse text to obj
 			//if(resData.unreadMessages != )
-			$jData.unreadMessages = [...resData.unreadMessages, ...$jData.unreadMessages]
-			$jData.unreadPosts = resData.unreadPosts
+			//$jData.unreadMessages = [...resData.unreadMessages, ...$jData.unreadMessages]
+			console.log(resData.friendPosts.length)
+			console.log($jData.friendPosts.length)
+			// isolate unread posts from list
+			// downside of this approach = async stores across devices
+			if(resData.friendPosts.length > $jData.friendPosts.length){
+				let dif = resData.friendPosts.length-$jData.friendPosts.length
+				console.log(dif)
+				let newPosts = resData.friendPosts.slice(resData.friendPosts.length-dif)
+				console.log(newPosts)
+				$jData.unreadPosts = [...newPosts, ...$jData.unreadPosts]
+			}
+
+			$jData.unreadPosts = resData.friendPosts
 			$jData.friends = resData.friends
 			$jData.posts = resData.myPosts
 			//console.log(resData.unreadPosts)
@@ -23,7 +35,7 @@
 			$jData.userName = resData.name
 
 		}catch(err){
-			console.log("SSE connection error")
+			console.log("SSE error:", err)
 		}
 	})
 </script>

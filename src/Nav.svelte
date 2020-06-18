@@ -3,17 +3,15 @@
   $: unreadMessagesCount = $jData.unreadMessages.length
   $: unreadNotificationsCount = $jData.unreadPosts.length
 
-  // MAKE WITH AJAX
-  // setTimeout( function(){
-  //   let unreadMessage = {"id":2, "message":"c"}
-  //   // method 1 of updating DOM
-  //   //$jData.unreadMessages.push(unreadMessage)
-  //   //$jData = $jData
-    
-  //   // method 2 of updating DOM
-  //   $jData.unreadMessages = [unreadMessage, ...$jData.unreadMessages]
-
-  // }, 5000)
+  function checkNotis(){
+    console.log('before', $jData)
+    // console.log($jData.unreadPosts)
+    $jData.friendPosts = [...$jData.unreadPosts, ...$jData.friendPosts]
+    $jData.unreadPosts = []
+    // console.log($jData.unreadPosts)
+    // console.log($jData.friendPosts)
+    console.log('after', $jData)
+  }
 </script>
 
 <!-- ###################################### -->
@@ -34,7 +32,7 @@
 
     <div class="middle">
         <div class="active">
-        <i class="fas fa-home"></i>{$jData.unreadPosts.length > 0 ? 'New posts': ''}
+        <i class="fas fa-home"></i>
         </div>
         <div>
         <i class="fas fa-video"></i>
@@ -46,21 +44,25 @@
 
     <div class="right">
         <div>
-        {$jData.userName}        
+          {$jData.userName}        
         </div>
         <div>
-        <i class="fas fa-plus-circle"></i>
+          <i class="fas fa-plus-circle"></i>
         </div>
         <div>
-        <i class="far fa-comment-alt"></i>
-        <div class="chat-counter">{unreadMessagesCount}</div>       
+          <i class="far fa-comment-alt"></i>
+          <div class="chat-counter">{unreadMessagesCount}</div>       
+        </div>
+        
+        <div>
+          <label class="nav-right-labels" for="notis"></label>
+          <i class="far fa-bell"></i>
+          <div class="notification-counter">{unreadNotificationsCount}</div>
+          <div class="new-notifications">{$jData.unreadPosts.length > 0 ? 'New!': ''}</div> 
+          <button id="notis" class="btn-hidden" on:click={checkNotis}></button> 
         </div>
         <div>
-        <i class="far fa-bell"></i> 
-        <div class="notification-counter">{unreadNotificationsCount}</div>         
-        </div>
-        <div>
-        <i class="fas fa-user"></i>      
+          <i class="fas fa-user"></i>      
         </div>                  
     </div>
 </nav>
@@ -178,6 +180,35 @@ nav div.notification-counter{
   color: white;
   background: #f02849;
   border-radius: 50%;
+}
+.new-notifications {
+    position: absolute;
+    font-size: 1rem;
+    width: max-content;
+    left: -0.75rem;
+    top: 2.2rem;
+    font-weight: 400;
+    color: #dddd19;
+    background: white;
+    padding: 0.3rem;
+    border-radius: 0.3em;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+}
+.btn-hidden{
+  display: none;
+}
+.nav-right-labels{
+  width: 3.1rem;
+  left: -0.9rem;
+  top: -1rem;
+  height: 5rem;
+  position: absolute;
+  z-index: 9999;
+}
+.nav-right-labels:hover{
+  cursor: pointer;
 }
 
 </style>
