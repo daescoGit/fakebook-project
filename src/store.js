@@ -1,6 +1,7 @@
 import { writable } from "svelte/store"
 export let jData = writable(
     {
+        "userID":"",
         "userName":"",
         "password":"",
         "email":"",

@@ -153,7 +153,7 @@ div.main-left{
   width: 25vw;
   height: 100vh;
   padding: 0px 1rem;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 /* div.main-left div.s2{
   display: grid;

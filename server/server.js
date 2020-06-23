@@ -2,8 +2,18 @@ const express = require("express")
 const app = express()
 const path = require("path")
 const formidable = require("formidable")
+const detect = require("detect-file-type")
+// Needs to be de-structured for some reason // npm uuid
+const {v1: uuidv1} = require("uuid")
+// Serving public dir
+var publicDir = require('path').join(__dirname,'../public');
+app.use(express.static(publicDir));
+// For moving temp files (media)
+const fs = require("fs")
+// JWT
 var jwt = require('jsonwebtoken')
-// For insertions
+const { on } = require("process")
+// For ID obj creation
 const ObjectID = require('mongodb').ObjectID
 // Use Mongo client files
 const mongoClient = require("mongodb").MongoClient
@@ -22,8 +32,11 @@ mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, (err, response) => {
     globalVersion = 0
 })
 
-// ANTI SERVER CRASH HERE (make snippet)
+// ANTI SERVER CRASH
 // ##################################
+process.on("uncaughtException", (err, data) => {
+    if(err){ console.log("critical error, yet system keeps running"); return }
+})
 
 app.listen(80, err => {
     if(err){console.log('Server not listening'); return}
@@ -56,10 +69,12 @@ app.post("/signup", (req, res) => {
                 "groups":[], 
                 "myMessages":[],
                 "friendMessages":[],
-                "myPosts":[],
-                "friendPosts":[]
+                "unreadMessages":[],
+                "posts":[],
+                "unreadPosts":[]
             }, (err, jMongoRes) => {
                 // naming res 'jMongoRes' to avoid outer res conflict
+                if(err){ console.log("Database object response error", err); res.status(500); return }
                 console.log(jMongoRes)
                 res.redirect('/login?registered')
                 return
@@ -94,6 +109,7 @@ app.post("/login", (req, res) => {
                 var token = jwt.sign({
                     id: `${jMongoRes._id}`,
                     name: `${jMongoRes.name}`,
+                    image: `${jMongoRes.image}`,
                 }, 
                 'the jwt secret key');
                 //console.log(token)
@@ -156,13 +172,13 @@ const verifyToken = (req, res, next) => {
     }
 }
 
-// USER PAGE
+// USER PAGE 
 // ##################################
 app.get("/profile", (req, res) => {
     res.sendFile(path.join(__dirname, "../public/index.html"))
 })
 
-// VERIFY & GET PROFILE PAGE DATA REQUEST WITH JWT
+// GET PROFILE PAGE DATA (SSE)
 // ##################################
 app.get("/sse-data", verifyToken, (req, res) => {
     // increase global ver to force initial load
@@ -185,56 +201,261 @@ app.get("/sse-data", verifyToken, (req, res) => {
     // SSE can only sent text (not obj)
     setInterval( () => {
         if(localVersion < globalVersion){
-            // TODO: skip/limit posts, try catch, strange version related bug
-            usersCollection.findOne({"name":token.name}, (err, jMongoRes) => {
-                if(err || jMongoRes==undefined){ console.log("Database object response error"); return }
-                //console.log(jMongoRes)
-                res.status(200).write(`data: ${JSON.stringify(jMongoRes)}\n\n`)
-                localVersion = globalVersion
-            })
+            // TODO: strange version related bug
+            try{
+                usersCollection.findOne({ _id: new ObjectID(token.id) }, (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    //console.log(jMongoRes.myPosts)
+                    res.status(200).write(`data: ${JSON.stringify(jMongoRes)}\n\n`)
+                    localVersion = globalVersion
+                })
+            }catch(err){
+                console.log(err)
+                res.status(500).send(err)
+            }
         }
     }, 100)
 })
 
-// UPDATE DATA (post or patch or put?)
+// UPDATE POSTS IN DB (ORGANIZE)
 // ##################################
+app.post("/update-notifications", verifyToken, (req, res) => {
+    try{
+        let updated = req.get('X-Custom-Header-Data')
+        let jUpdated = JSON.parse(updated)
+        let userId = new ObjectID(token.id)
+        usersCollection.findOneAndUpdate(
+            // id needs to be an object
+            { _id: userId },
+            // $ = mongo command
+            { $set: { posts: jUpdated, unreadPosts: [] } },
+            (err, jMongoRes) => {
+                if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                res.json(jMongoRes)
+                globalVersion++
+            }
+        )
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
 
+// POST LIKES
+// ##################################
+app.post("/like-post", verifyToken, (req, res) => {
+    try{
+        let postData = req.get('X-Custom-Header-Data')
+        let jPostData = JSON.parse(postData)
+        let postID = jPostData[1].postID
+        let userID = token.id
+        let status = jPostData[0].status
+
+        // HOLY ¤%"="!¤ this was hard to figure out
+        // dry later
+        if(status){
+            // insert user like obj (if status == true) into posts
+            usersCollection.updateMany(
+                { posts: { $elemMatch: { _id: postID } } },
+                //{ $inc: { "posts.$[elem].likes": status ? 1 : -1 } }, // abusable
+                { $addToSet: { "posts.$[post].likes": { userId: userID } } },
+                { arrayFilters: [ { "post._id": postID } ] },  //, { "user._id": userID } ], multi: true        
+                (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    // also into every unread instance
+                    usersCollection.updateMany(
+                        { unreadPosts: { $elemMatch: { _id: postID } } },
+                        { $addToSet: { "unreadPosts.$[post].likes": { userId: userID } } },
+                        { arrayFilters: [ { "post._id": postID } ] },     
+                        (err, jMongoRes2) => {
+                            if(err || jMongoRes2==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            //console.log(jMongoRes)
+                            res.status(200).send("Post updated")
+                            globalVersion++
+                            return
+                        }          
+                    )
+                }          
+            )
+        }else{
+            // remove like obj (if status == false)
+            usersCollection.updateMany(
+                { posts: { $elemMatch: { _id: postID } } },  
+                { $pull: { "posts.$[post].likes": { userId: userID } } },
+                { arrayFilters: [ { "post._id": postID } ] },   
+                (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    usersCollection.updateMany(
+                        { unreadPosts: { $elemMatch: { _id: postID } } },
+                        { $pull: { "unreadPosts.$[post].likes": { userId: userID } } },
+                        { arrayFilters: [ { "post._id": postID } ] },     
+                        (err, jMongoRes2) => {
+                            if(err || jMongoRes2==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            //console.log(jMongoRes)
+                            res.status(200).send("Post updated")
+                            globalVersion++
+                            return
+                        }          
+                    )
+                }          
+            ) 
+        }
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
 
 // USER POSTS
 // ##################################
-
 app.post("/posts", verifyToken, (req, res) => {
     try{
         const form = formidable({ multiples: true });
         form.parse(req, (err, fields, files) => {
-            let userId = token.id
-            let message = fields.message
-            let name = token.name
-            let media = fields.media
-            // own posts
+
+            function makePost(mediaName){
+                try{
+                    let newPostID = new ObjectID().toString()
+                    let userID = token.id
+                    // own posts
+                    usersCollection.findOneAndUpdate(
+                        // id needs to be an object
+                        { _id: new ObjectID(token.id) },
+                        // $ = mongo command
+                        { $push: { posts: { _id: newPostID, userId: userID, message: fields.message, name: token.name, mediaName, comments:[], likes:[] } } },
+                        (err, jMongoRes) => {
+                            if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            // other's posts
+                            usersCollection.updateMany(
+                                { friends: { $elemMatch: { _id: token.id } } },
+                                { $push: { unreadPosts: { _id: newPostID, userId: token.id, message: fields.message, name: token.name, mediaName, comments:[], likes:[] } } },
+                                (err, jMongoRes2) => {
+                                    if(err || jMongoRes2==undefined){ console.log("Database object response error", err); res.status(500); return }
+                                    res.status(200).send("Post created")
+                                    globalVersion++
+                                    return
+                                }          
+                            )
+                        }
+                    )             
+                }catch(err){
+                    // mb. email admin
+                    console.log(err)
+                    return res.status(500).send("System under maintenance")
+                }
+            }
+
+            // No media upload
+            console.log(files.media.size)
+            if(files.media.size == 0){
+                makePost('')
+            }else{
+                // With media upload
+                try{
+                    detect.fromFile(files.media.path, (err, result) => {
+                        if(err){ console.log(err); res.send("Error in file"); return}
+                        const mediaName = uuidv1()+"."+result.ext
+                        const allowedImageTypes = ["jpg","jpeg","png","gif"]
+                        if( ! allowedImageTypes.includes(result.ext)) {
+                            return res.send("File type not allowed")
+                        }
+                        const oldPath = files.media.path
+                        const newPath = path.join(__dirname, "../public/media", mediaName)
+                        // moving pic from temp path to public folder (callback)
+                        fs.rename(oldPath, newPath, err => {
+                            if(err){ console.log(err); res.send("Could not move file"); return}
+                            makePost(mediaName)
+                        })
+                    })
+                }catch(err){
+                    console.log(err)
+                    return res.send("Could not upload image")
+                }
+            }
+        });
+    }catch(err){
+        console.log("Error retrieving form:", err)
+        res.status(500).send(err)
+    }
+})
+
+// GET ALL USERS
+// ##################################
+app.post("/get-users", (req, res) => {
+    try{
+        usersCollection.find({}, { projection: { name: 1, image: 1 }}).toArray((err, jMongoRes) => { //{ name: 1, image: 1 },
+            if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+            console.log(JSON.stringify(jMongoRes))
+            res.status(200).send(jMongoRes)
+        })
+
+        // db.collection("users").find().toArray( (err, res) => {
+        //     if(err){console.log("error reading user"); return}
+        //     console.log(res)
+        // })
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }  
+})
+
+// ADD FRIEND
+// ##################################
+app.post("/add-friend", verifyToken, (req, res) => {
+    try{
+        let postData = req.get('X-Custom-Header-Data')
+        console.log(postData)
+        let jPostData = JSON.parse(postData)
+        let jReqType = jPostData[1]
+        let jFriend = jPostData[0]
+        let friendId = new ObjectID(jFriend._id)
+        let userId = new ObjectID(token.id)
+        // Friendship request
+        if(jReqType == 0){
             usersCollection.findOneAndUpdate(
-                // id needs to be an object
-                { _id: new ObjectID(userId) },
-                // $ = mongo command
-                { $push: { myPosts: { userId, message, name, media } } },
+                { _id: friendId },
+                { $addToSet: { friendRequests: { _id: token.id, name: token.name, image: token.image } } },
                 (err, jMongoRes) => {
-                    if(err){ res.json(err) }
-                    //res.json(jMongoRes)
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    res.status(200).send('ok')
                     globalVersion++
+                    return
                 }
             )
-    
-            // other's posts
-            usersCollection.updateMany(
-                {"friends":{$elemMatch:{ _id: userId }}},
-                { $push: { friendPosts: { userId, message, name, media } } },
+        // Accepting friendship request
+        }else if(jReqType == 1){
+             // Insert into my friends and remove from requests
+            usersCollection.findOneAndUpdate(
+                { _id: userId },
+                { $addToSet: { friends: jFriend }, $pull: { friendRequests: { _id: jFriend._id } } },
                 (err, jMongoRes) => {
-                    if(err){ res.json(err) }
-                    res.json(jMongoRes)
-                    globalVersion++
-                }          
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    //Insert into friend's friends
+                    usersCollection.findOneAndUpdate(
+                        { _id: friendId },
+                        { $addToSet: { friends: { _id: token.id, name: token.name, image: token.image } } },
+                        (err, jMongoRes2) => {
+                            if(err || jMongoRes2==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            res.status(200).send('ok')
+                            globalVersion++
+                            return
+                        }
+                    )
+                }
             )
-        });
+        // Rejecting friendship request
+        }else if(jReqType == 2){
+            usersCollection.findOneAndUpdate(
+                { _id: userId },
+                {  $pull: { friendRequests: { _id: jFriend._id } } },
+                (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    res.status(200).send('ok')
+                    globalVersion++
+                    return
+                }
+            )
+        }
     }catch(err){
         console.log(err)
         res.status(500).send(err)
@@ -243,7 +464,6 @@ app.post("/posts", verifyToken, (req, res) => {
 
 // TEST API USER POSTS
 // ##################################
-
 app.post("/api-posts", (req, res) => {
     try{
         const form = formidable({ multiples: true });
@@ -255,9 +475,9 @@ app.post("/api-posts", (req, res) => {
             // other's posts
             usersCollection.updateMany(
                 {"friends":{$elemMatch:{ _id: userId }}},
-                { $push: { friendPosts: { userId, message, name } } },
+                { $push: { unreadPosts: { userId, message, name } } },
                 (err, jMongoRes) => {
-                    if(err){ res.json(err) }
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
                     res.json(jMongoRes)
                     globalVersion++
                 }          
