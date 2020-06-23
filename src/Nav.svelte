@@ -1,19 +1,64 @@
 <script>
   import { jData } from "./store.js"
   $: unreadMessagesCount = $jData.unreadMessages.length
-  $: unreadNotificationsCount = $jData.unreadPosts.length
+  $: unreadNotificationsCount = $jData.unreadPosts.length+$jData.friendRequests.length
 
-  // MAKE WITH AJAX
-  // setTimeout( function(){
-  //   let unreadMessage = {"id":2, "message":"c"}
-  //   // method 1 of updating DOM
-  //   //$jData.unreadMessages.push(unreadMessage)
-  //   //$jData = $jData
-    
-  //   // method 2 of updating DOM
-  //   $jData.unreadMessages = [unreadMessage, ...$jData.unreadMessages]
+  let unreadPostsInfo = ''
+  let friendRequestsInfo = []
+  let open = false
 
-  // }, 5000)
+  function checkNotice(){ 
+    if(open){
+      unreadPostsInfo = ''
+      friendRequestsInfo = []
+      unreadNotificationsCount = unreadNotificationsCount
+      open = false
+      return
+    }
+    unreadPostsInfo = $jData.unreadPosts.length+' Unread posts'
+    friendRequestsInfo = $jData.friendRequests
+    //console.log($jData.friendRequests)
+    unreadNotificationsCount = 0
+    open = true
+    //document.querySelector('#notice-label').setAttribute("style", "height: 100vh; width: 12rem; top: -1rem; right: -1rem;");
+  }
+
+  async function checkPosts(){
+    $jData.posts = [...$jData.unreadPosts, ...$jData.posts]
+    //$jData.friendPosts = [...$jData.unreadPosts, ...$jData.friendPosts]
+    $jData.unreadPosts = []
+    try{
+      let connection = await fetch("update-notifications", {
+        method: 'POST',       
+        headers: {
+        'X-Custom-Header': localStorage.jwt,
+        'X-Custom-Header-Data': JSON.stringify($jData.posts)
+        }
+      })
+      let response = await(connection)
+      //console.log(response.status)
+    }catch(err){
+      console.log("error updating"); return
+    }
+  }
+
+  async function frResponse(friend, frRes){
+    let postData = [friend, frRes]
+    try{
+        let connection = await fetch("add-friend", {
+            method: 'POST',
+            headers: {
+                'X-Custom-Header': localStorage.jwt,
+                'X-Custom-Header-Data': JSON.stringify(postData)
+            }
+        })
+        let response = await(connection)
+        console.log(response) 
+    }catch(err){
+        console.log("error handling friend request"); return
+    }
+  }
+
 </script>
 
 <!-- ###################################### -->
@@ -34,7 +79,7 @@
 
     <div class="middle">
         <div class="active">
-        <i class="fas fa-home"></i>{$jData.unreadPosts.length > 0 ? 'New posts': ''}
+        <i class="fas fa-home"></i>
         </div>
         <div>
         <i class="fas fa-video"></i>
@@ -46,21 +91,36 @@
 
     <div class="right">
         <div>
-        {$jData.userName}        
+          { $jData.userName.charAt(0).toUpperCase() + $jData.userName.slice(1) }        
         </div>
         <div>
-        <i class="fas fa-plus-circle"></i>
+          <i class="far fa-comment-alt"></i>
+          <div class="chat-counter">{unreadMessagesCount}</div>       
+        </div>
+        
+        <div id="notice" on:click={checkNotice}>
+          <!-- <label id="notice-label" class="nav-right-labels" for="notice"></label> -->
+          <i class="far fa-bell"></i>
+          <div class="notification-counter">{unreadNotificationsCount}</div>
+          {#if unreadNotificationsCount > 0 }
+            <div class="new-notifications">New!</div>
+          {/if}
+          <div id="notice-messages">
+            <div class="notice-messages-element" on:click={checkPosts}>{unreadPostsInfo}</div>
+            {#if $jData.friendRequests.length > 0 }
+              {#each friendRequestsInfo as friendRequest}
+                <div class="notice-messages-element">
+                  Friend requests from: {friendRequest.name}
+                  <div on:click={frResponse(friendRequest, 1)}>✔️</div>
+                  <div on:click={frResponse(friendRequest, 2)}>❌</div>
+                </div> 
+              {/each}
+            {/if}
+          </div>
+          <!-- <button id="notis" class="btn-hidden" on:click={checkPosts}></button>  -->
         </div>
         <div>
-        <i class="far fa-comment-alt"></i>
-        <div class="chat-counter">{unreadMessagesCount}</div>       
-        </div>
-        <div>
-        <i class="far fa-bell"></i> 
-        <div class="notification-counter">{unreadNotificationsCount}</div>         
-        </div>
-        <div>
-        <i class="fas fa-user"></i>      
+          <i class="fas fa-user"></i>      
         </div>                  
     </div>
 </nav>
@@ -179,5 +239,58 @@ nav div.notification-counter{
   background: #f02849;
   border-radius: 50%;
 }
+.new-notifications {
+    position: absolute;
+    font-size: 1rem;
+    width: max-content;
+    left: -0.75rem;
+    top: 2.2rem;
+    font-weight: 400;
+    background: #fdffd6;
+    color: #868629;
+    padding: 0.3rem;
+    border-radius: 0.3em;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+    z-index: 9999;
+}
+#notice-messages{
+    position: absolute;
+    min-width: 10rem;
+    text-align: center;
+    right: 0;
+    font-size: 1.0rem;
+    background: white;
+    border-radius: 0.3rem;
+    font-weight: 400;
+    -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+    -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+}
+
+.btn-hidden{
+  display: none;
+}
+
+.nav-right-labels{
+  width: 3.1rem;
+  right: -0.9rem;
+  top: -1rem;
+  height: 5rem;
+  position: absolute;
+  z-index: 3;
+}
+.nav-right-labels:hover{
+  cursor: pointer;
+}
+
+#notice:hover{
+  cursor: pointer;
+}
+
+/* .notice-messages-element{
+  padding: 0.5rem;
+} */
 
 </style>

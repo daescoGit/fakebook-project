@@ -16,6 +16,8 @@ input{
   font-weight: inherit;
   font-family: inherit;
   outline: none;
+  background: rgba(29, 161, 242, 0.03);
+
 }
 
 /* ############################## */
