@@ -12,7 +12,9 @@ app.use(express.static(publicDir));
 const fs = require("fs")
 // JWT
 var jwt = require('jsonwebtoken')
+
 const { on } = require("process")
+
 // For ID obj creation
 const ObjectID = require('mongodb').ObjectID
 // Use Mongo client files
@@ -22,6 +24,7 @@ const mongoUrl = "mongodb://localhost:27017"
 // Database vars setup
 let db = ''
 let usersCollection = ''
+globalVersion = 0
 // Connect
 // Using connection pool = not needed to open new con in all routes
 mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, (err, response) => {
@@ -29,7 +32,6 @@ mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, (err, response) => {
     console.log('connected to mongo')
     db = response.db("fakebook")
     usersCollection = db.collection("users")
-    globalVersion = 0
 })
 
 // ANTI SERVER CRASH
@@ -68,7 +70,6 @@ app.post("/signup", (req, res) => {
                 "friendRequests":[], 
                 "groups":[], 
                 "myMessages":[],
-                "friendMessages":[],
                 "unreadMessages":[],
                 "posts":[],
                 "unreadPosts":[]
@@ -233,6 +234,28 @@ app.post("/update-notifications", verifyToken, (req, res) => {
                 if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
                 res.json(jMongoRes)
                 globalVersion++
+                return
+            }
+        )
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
+
+// UPDATE MESSAGES IN DB (ORGANIZE)
+// ##################################
+app.post("/update-msg-notifications", verifyToken, (req, res) => {
+    try{
+        let userId = new ObjectID(token.id)
+        usersCollection.findOneAndUpdate(
+            { _id: userId },
+            { $set: { unreadMessages: [] } },
+            (err, jMongoRes) => {
+                if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                res.json(jMongoRes)
+                globalVersion++
+                return
             }
         )
     }catch(err){
@@ -462,9 +485,44 @@ app.post("/add-friend", verifyToken, (req, res) => {
     }
 })
 
+// SEND CHAT MESSAGE
+// ##################################
+app.post("/chat-message", verifyToken, (req, res) => {
+    try{
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            let senderId = fields.senderId
+            let receiverId = fields.receiverId
+            let message = fields.message
+            let name = fields.name
+
+            usersCollection.findOneAndUpdate(
+                { _id: new ObjectID(senderId)},
+                { $push: { myMessages: { senderId, receiverId, name, message } } },
+                (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    usersCollection.findOneAndUpdate(
+                        { _id: new ObjectID(receiverId)},
+                        { $push: { myMessages: { senderId, receiverId, name, message }, unreadMessages: { senderId, receiverId, name, message } } },
+                        (err, jMongoRes) => {
+                            if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            res.send('ok')
+                            globalVersion++
+                            return
+                        }          
+                    )
+                }          
+            )
+        });
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
+
 // TEST API USER POSTS
 // ##################################
-app.post("/api-posts", (req, res) => {
+app.post("/api-post", (req, res) => {
     try{
         const form = formidable({ multiples: true });
         form.parse(req, (err, fields, files) => {
@@ -480,6 +538,42 @@ app.post("/api-posts", (req, res) => {
                     if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
                     res.json(jMongoRes)
                     globalVersion++
+                    return
+                }          
+            )
+        });
+    }catch(err){
+        console.log(err)
+        res.status(500).send(err)
+    }
+})
+
+// TEST API CHAT MESSAGE
+// ##################################
+app.post("/api-message", (req, res) => {
+    try{
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            let senderId = fields.senderId
+            let receiverId = fields.receiverId
+            let message = fields.message
+            let name = fields.name
+
+            usersCollection.findOneAndUpdate(
+                { _id: new ObjectID(senderId)},
+                { $push: { myMessages: { senderId, receiverId, name, message } } },
+                (err, jMongoRes) => {
+                    if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                    usersCollection.findOneAndUpdate(
+                        { _id: new ObjectID(receiverId)},
+                        { $push: { myMessages: { senderId, receiverId, name, message } } },
+                        (err, jMongoRes) => {
+                            if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                            res.send('ok')
+                            globalVersion++
+                            return
+                        }          
+                    )
                 }          
             )
         });

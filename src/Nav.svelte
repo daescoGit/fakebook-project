@@ -5,22 +5,21 @@
 
   let unreadPostsInfo = ''
   let friendRequestsInfo = []
-  let open = false
+  let noticeOpen = false
 
   function checkNotice(){ 
-    if(open){
+    if(noticeOpen){
       unreadPostsInfo = ''
       friendRequestsInfo = []
       unreadNotificationsCount = unreadNotificationsCount
-      open = false
+      noticeOpen = false
       return
     }
     unreadPostsInfo = $jData.unreadPosts.length+' Unread posts'
     friendRequestsInfo = $jData.friendRequests
     //console.log($jData.friendRequests)
     unreadNotificationsCount = 0
-    open = true
-    //document.querySelector('#notice-label').setAttribute("style", "height: 100vh; width: 12rem; top: -1rem; right: -1rem;");
+    noticeOpen = true
   }
 
   async function checkPosts(){
@@ -37,6 +36,25 @@
       })
       let response = await(connection)
       //console.log(response.status)
+    }catch(err){
+      console.log("error updating"); return
+    }
+  }
+
+  async function checkMsg(){
+    try{
+      let connection = await fetch("update-msg-notifications", {
+        method: 'POST',       
+        headers: {
+          'X-Custom-Header': localStorage.jwt
+        }
+      })
+      let response = await(connection)
+      // open chat(s)
+      $jData.unreadMessages.forEach(unreadMessage => {
+        document.getElementById(unreadMessage.senderId).setAttribute("style", "display:block;")
+      });     
+      $jData.unreadMessages = []
     }catch(err){
       console.log("error updating"); return
     }
@@ -93,9 +111,13 @@
         <div>
           { $jData.userName.charAt(0).toUpperCase() + $jData.userName.slice(1) }        
         </div>
-        <div>
+
+        <div id="notice" on:click={checkMsg}>
           <i class="far fa-comment-alt"></i>
-          <div class="chat-counter">{unreadMessagesCount}</div>       
+          <div class="chat-counter">{unreadMessagesCount}</div>  
+          {#if unreadMessagesCount > 0 }
+            <div class="new-notifications">New!</div>
+          {/if}
         </div>
         
         <div id="notice" on:click={checkNotice}>
@@ -117,7 +139,6 @@
               {/each}
             {/if}
           </div>
-          <!-- <button id="notis" class="btn-hidden" on:click={checkPosts}></button>  -->
         </div>
         <div>
           <i class="fas fa-user"></i>      
@@ -143,11 +164,11 @@ nav{
   font-size: 1.5rem;
   color: #555;
   background: white;
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
   z-index: 1;
 }
 nav div.active{
-  border-bottom: 0.2rem solid #1da1f2;
+  border-bottom: 0.2rem solid #575ed8;
 }
 nav div.left{
   display: grid;
@@ -161,7 +182,7 @@ nav div.left div.logo{
   align-items: center;
   grid-gap: 0.5rem;
   font-weight: 400;
-  color: #1da1f2;
+  color: #575ed8;
 }
 nav div.left form > div{
   position: relative;
@@ -253,7 +274,7 @@ nav div.notification-counter{
     -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
-    z-index: 9999;
+    z-index: 0;
 }
 #notice-messages{
     position: absolute;
