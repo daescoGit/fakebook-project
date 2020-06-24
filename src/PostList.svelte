@@ -83,7 +83,7 @@
 <style>
 button {
   color: white;
-  background: #1da1f2;
+  background: #575ed8;
   height: 2rem;
   width: 33.3%;
   margin: 0 33.3%;
@@ -103,10 +103,6 @@ button:hover {
   border-radius: 0.5rem;
 }
 
-.create-post form input{
-  width: 100%;
-  background: rgba(0, 0, 0, 0.05);
-}
 #optionals {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

@@ -20,7 +20,7 @@
 <div class="create-post">
     <div>
     <form on:submit|preventDefault id="frmNewPost">
-        <input id="msg" type="text" name="message" placeholder="Hey {$jData.userName}, how's life?">
+        <input id="msg" type="text" name="message" placeholder="Hey {$jData.userName}, how's life?" autocomplete="off">
         <div id="optionals">
         <label for="media" id="media-label"><i class="far fa-image photo"></i> Image/Video</label>
         <input type="file" name="media" id="media">
@@ -38,7 +38,7 @@
 <style>
 button {
   color: white;
-  background: #1da1f2;
+  background: #575ed8;
   height: 2rem;
   width: 33.3%;
   margin: 0 33.3%;
@@ -46,6 +46,11 @@ button {
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 0.3rem;
   outline: none;
+}
+
+.create-post form input{
+  width: 100%;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 button:hover {

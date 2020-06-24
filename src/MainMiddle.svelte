@@ -1,8 +1,6 @@
 <script>
-  import { jData } from './store.js'
   import CreatePost from './CreatePost.svelte'
   import PostList from './PostList.svelte'
-
 </script>
 
 <!-- ###################################### -->

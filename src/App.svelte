@@ -3,6 +3,7 @@
 	import MainLeft from "./MainLeft.svelte"
 	import MainRight from "./MainRight.svelte"
 	import MainMiddle from "./MainMiddle.svelte"
+	import ChatContainer from "./ChatContainer.svelte"
 	
 	import { jData } from "./store.js"
 
@@ -15,9 +16,7 @@
 			let resData = JSON.parse(event.data) // parse text to obj
 			$jData.userName = resData.name
 			$jData.userID = resData._id
-			$jData.unreadPosts = resData.unreadPosts
 			$jData.friendRequests = resData.friendRequests
-			//$jData.friendPosts = resData.friendPosts
 			$jData.friends = resData.friends
 			$jData.posts = resData.posts.sort(function (a, b){
 				// timestamp is contained in the first 4 bytes of mongo id
@@ -26,6 +25,9 @@
 				return p2 - p1
 				}
 			)
+			$jData.unreadPosts = resData.unreadPosts
+			$jData.messages = resData.myMessages
+			$jData.unreadMessages = resData.unreadMessages
 
 			// isolate unread posts from list (client cache instead of bloated db)
 			// downside of this approach = async stores across devices
@@ -50,6 +52,7 @@
 	<MainLeft />
 	<MainRight />
 	<MainMiddle />
+	<ChatContainer />
 </main>
 
 <!-- ###################################### -->

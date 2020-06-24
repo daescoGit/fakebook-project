@@ -1,15 +1,19 @@
 <script>
     import { jData } from './store.js'
-    import { addChatWindow } from './ChatContainer.svelte'
+    //import { addChatWindow } from './ChatContainer.svelte'
     $: friends = $jData.friends
 
     let users = []
     let input = ''
     let results = []
 
-    const showChatWindow = () => {
-        addChatWindow()
+    // ############ CHAT RELATED ############
+
+    const showChatWindow = (friendID) => {
+        document.getElementById(friendID).setAttribute("style", "display:block;")
     }
+
+    // ############ ADD FRIEND RELATED ############
 
     async function getUsers(){
         try{
@@ -61,7 +65,6 @@
         }catch(err){
             console.log("error requesting friendship"); return
         }
-        // if already friends...
     }
 
 </script>
@@ -70,7 +73,7 @@
 
 <div id="a" class="main-right">
 
-    <input id="add-friend" type="text" placeholder="Add a friend" bind:value={input} on:click={getUsers} on:input={searchUsers}>
+    <input id="add-friend" type="text" placeholder="Add a friend" bind:value={input} on:click={getUsers} on:input={searchUsers} autocomplete="off">
 
     <div id="friend-search-results">
     {#each results as result}
@@ -89,7 +92,7 @@
     </div>
 
     {#each friends as friend}
-        <div class="mini-profile" on:click={showChatWindow}>
+        <div class="mini-profile" on:click={showChatWindow(friend._id)}>
             <img src="https://source.unsplash.com/random/50x55" alt="">
             <div>
                 <div>{ friend.name }</div>
@@ -113,7 +116,6 @@ div.main-right{
     left: 75vw;
     display: grid;
     grid-auto-rows: min-content;
-    grid-gap: 1rem;
     width: 25vw;
     padding-right: 1rem;
     height: calc(100vh - 5.5rem);
