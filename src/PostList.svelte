@@ -46,10 +46,10 @@
     {#each $jData.posts.slice(0, count) as post}
     <div class="post">
         <div class="mini-profile">
-            <img src="https://source.unsplash.com/random/51x58" alt="">
+            <img src="/media/{post.profilePic}" alt="">
             <div>
-            <div>{post.name}</div>
-            <div>{getTime(post._id)}</div>
+              <div>{post.name}</div>
+              <div>{getTime(post._id)}</div>
             </div>
         </div>
         <!-- end mini-profile -->

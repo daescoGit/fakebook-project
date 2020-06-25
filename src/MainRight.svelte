@@ -78,7 +78,7 @@
     <div id="friend-search-results">
     {#each results as result}
         <div class="mini-profile" on:click={requestFriend(result)}>
-            <img src="https://source.unsplash.com/random/50x55" alt="">
+            <img src="/media/{result.image}" alt="">
             <div>
                 <div>{ result.name }</div>
                 <div id="status-container">
@@ -93,7 +93,7 @@
 
     {#each friends as friend}
         <div class="mini-profile" on:click={showChatWindow(friend._id)}>
-            <img src="https://source.unsplash.com/random/50x55" alt="">
+            <img src="/media/{friend.image}" alt="">
             <div>
                 <div>{ friend.name }</div>
                 <div id="status-container">
@@ -148,6 +148,7 @@ div.mini-profile{
 
 #add-friend{
     margin-bottom: 1rem;
+    width: 80%
 }
 
 #friend-search-results{

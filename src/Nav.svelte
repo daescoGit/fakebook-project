@@ -41,25 +41,6 @@
     }
   }
 
-  async function checkMsg(){
-    try{
-      let connection = await fetch("update-msg-notifications", {
-        method: 'POST',       
-        headers: {
-          'X-Custom-Header': localStorage.jwt
-        }
-      })
-      let response = await(connection)
-      // open chat(s)
-      $jData.unreadMessages.forEach(unreadMessage => {
-        document.getElementById(unreadMessage.senderId).setAttribute("style", "display:block;")
-      });     
-      $jData.unreadMessages = []
-    }catch(err){
-      console.log("error updating"); return
-    }
-  }
-
   async function frResponse(friend, frRes){
     let postData = [friend, frRes]
     try{
@@ -77,6 +58,41 @@
     }
   }
 
+  async function checkMsg(){
+    if($jData.unreadMessages.length > 0){
+      try{
+        let connection = await fetch("update-msg-notifications", {
+          method: 'POST',       
+          headers: {
+            'X-Custom-Header': localStorage.jwt
+          }
+        })
+        let response = await(connection)
+        // open chat(s)
+        $jData.unreadMessages.forEach(unreadMessage => {
+          document.getElementById(unreadMessage.senderId).setAttribute("style", "display:block;")
+        });     
+        $jData.unreadMessages = []
+      }catch(err){
+        console.log("error updating"); return
+      }
+    }
+  }
+
+  async function uploadImage() {
+    let form = new FormData(document.querySelector("#frmNewImage"))
+    let connection = await fetch("profile-image", {
+      method: "POST",
+      headers: {
+      'X-Custom-Header': localStorage.jwt
+      },
+      body: form
+    })
+    let response = await(connection)
+  }
+
+  function menu(){ document.getElementById("menu").setAttribute("style", "display:block;") }
+  function menuClose(){ document.getElementById("menu").setAttribute("style", "display:none;") }
 </script>
 
 <!-- ###################################### -->
@@ -112,7 +128,7 @@
           { $jData.userName.charAt(0).toUpperCase() + $jData.userName.slice(1) }        
         </div>
 
-        <div id="notice" on:click={checkMsg}>
+        <div class="notice" on:click={checkMsg}>
           <i class="far fa-comment-alt"></i>
           <div class="chat-counter">{unreadMessagesCount}</div>  
           {#if unreadMessagesCount > 0 }
@@ -120,7 +136,7 @@
           {/if}
         </div>
         
-        <div id="notice" on:click={checkNotice}>
+        <div class="notice" on:click={checkNotice}>
           <!-- <label id="notice-label" class="nav-right-labels" for="notice"></label> -->
           <i class="far fa-bell"></i>
           <div class="notification-counter">{unreadNotificationsCount}</div>
@@ -141,8 +157,17 @@
           </div>
         </div>
         <div>
-          <i class="fas fa-user"></i>      
+          <i class="fas fa-user" on:click={menu}></i>      
         </div>                  
+    </div>
+
+    <div id="menu">
+      <button class="close" on:click={menuClose}>X</button>
+      <a href="logout">Logout</a>   
+      <form on:submit|preventDefault id="frmNewImage">
+        <label for="profile" id="profile-image-label"><i class="far fa-image photo"></i> Profile Picture</label>
+        <input type="file" name="profile" id="profile" on:change={uploadImage}>
+      </form>
     </div>
 </nav>
 
@@ -150,9 +175,13 @@
 
 <style>
 
+a{
+  text-decoration: none;
+}
+
 nav{
   display: grid;
-  grid-template-columns: 25fr 40fr 10fr;
+  grid-template-columns: 33fr 33fr 33fr;
   grid-gap: 2rem;
 
   position: fixed;
@@ -215,10 +244,13 @@ nav div.middle > div{
 }
 nav div.right{
   display: grid;
-  grid-template-columns: 8fr 8fr 1fr 1fr 8fr;
+  grid-template-columns: 8fr 1fr 1fr 1fr 1fr;
   align-items: center;
   grid-gap: 2rem;
   align-items: center;
+}
+nav div.right > div:first-child{
+  text-align: end;
 }
 nav div.right > div{
   position: relative;
@@ -290,28 +322,53 @@ nav div.notification-counter{
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
 }
 
-.btn-hidden{
-  display: none;
-}
-
-.nav-right-labels{
-  width: 3.1rem;
-  right: -0.9rem;
-  top: -1rem;
-  height: 5rem;
-  position: absolute;
-  z-index: 3;
-}
-.nav-right-labels:hover{
+.notice{
   cursor: pointer;
-}
-
-#notice:hover{
-  cursor: pointer;
+  max-width: fit-content;
 }
 
 /* .notice-messages-element{
   padding: 0.5rem;
 } */
+
+#menu{
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 15rem;
+  background: white;
+  padding: 2rem;
+  -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
+}
+
+.fa-user{
+  cursor: pointer;
+}
+
+.close{
+  cursor: pointer;
+  background: #989898;
+  padding: 0.5rem 0.6rem 0.4rem;
+  font-size: 0.8rem;
+  text-align: center;
+  color: white;
+  border: none;
+  position: absolute;
+  top: 0.7rem;
+  right: 1rem;
+}
+
+#profile{
+  display: none;
+}
+
+#profile-image-label{
+  font-size: 1.2rem;
+  cursor: pointer;
+}
 
 </style>

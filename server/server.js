@@ -65,7 +65,7 @@ app.post("/signup", (req, res) => {
                 "name":username,
                 "password":password,
                 "email":email,
-                "image": "",
+                "image": "defaultProfile.jpg",
                 "friends":[],
                 "friendRequests":[], 
                 "groups":[], 
@@ -340,18 +340,20 @@ app.post("/posts", verifyToken, (req, res) => {
                 try{
                     let newPostID = new ObjectID().toString()
                     let userID = token.id
+                    profilePic = token.image
+                    console.log('img',fields.profilePic)
                     // own posts
                     usersCollection.findOneAndUpdate(
                         // id needs to be an object
                         { _id: new ObjectID(token.id) },
                         // $ = mongo command
-                        { $push: { posts: { _id: newPostID, userId: userID, message: fields.message, name: token.name, mediaName, comments:[], likes:[] } } },
+                        { $push: { posts: { _id: newPostID, userId: userID, message: fields.message, name: token.name, mediaName, comments:[], likes:[], profilePic } } },
                         (err, jMongoRes) => {
                             if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
                             // other's posts
                             usersCollection.updateMany(
                                 { friends: { $elemMatch: { _id: token.id } } },
-                                { $push: { unreadPosts: { _id: newPostID, userId: token.id, message: fields.message, name: token.name, mediaName, comments:[], likes:[] } } },
+                                { $push: { unreadPosts: { _id: newPostID, userId: token.id, message: fields.message, name: token.name, mediaName, comments:[], likes:[], profilePic } } },
                                 (err, jMongoRes2) => {
                                     if(err || jMongoRes2==undefined){ console.log("Database object response error", err); res.status(500); return }
                                     res.status(200).send("Post created")
@@ -516,6 +518,51 @@ app.post("/chat-message", verifyToken, (req, res) => {
         });
     }catch(err){
         console.log(err)
+        res.status(500).send(err)
+    }
+})
+
+
+// PROFILE PICTURE UPLOAD
+// ##################################
+app.post("/profile-image", verifyToken, (req, res) => {
+    try{
+        const form = formidable({ multiples: true });
+        form.parse(req, (err, fields, files) => {
+            try{
+                detect.fromFile(files.profile.path, (err, result) => {
+                    if(err){ console.log(err); res.send("Error in file"); return}
+                    const mediaName = uuidv1()+"."+result.ext
+                    const allowedImageTypes = ["jpg","jpeg","png"]
+                    if( ! allowedImageTypes.includes(result.ext)) {
+                        return res.send("File type not allowed")
+                    }
+                    const oldPath = files.profile.path
+                    const newPath = path.join(__dirname, "../public/media", mediaName)
+                    // moving pic from temp path to public folder (callback)
+                    fs.rename(oldPath, newPath, err => {
+                        if(err){ console.log(err); res.send("Could not move file"); return}
+                        let userId = new ObjectID(token.id)
+                        usersCollection.findOneAndUpdate(
+                            { _id: userId },
+                            { $set: { image: mediaName } },
+                            (err, jMongoRes) => {
+                                if(err || jMongoRes==undefined){ console.log("Database object response error", err); res.status(500); return }
+                                res.send('ok')
+                                console.log('ok')
+                                globalVersion++
+                                return
+                            }
+                        )
+                    })
+                })
+            }catch(err){
+                console.log(err)
+                return res.send("Could not upload image")
+            }
+        });
+    }catch(err){
+        console.log("Error retrieving form:", err)
         res.status(500).send(err)
     }
 })

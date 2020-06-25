@@ -21,6 +21,7 @@
     <div>
     <form on:submit|preventDefault id="frmNewPost">
         <input id="msg" type="text" name="message" placeholder="Hey {$jData.userName}, how's life?" autocomplete="off">
+        <!-- <input id="profilePic" type="hidden" name="profilePic" value={$jData.image}> -->
         <div id="optionals">
         <label for="media" id="media-label"><i class="far fa-image photo"></i> Image/Video</label>
         <input type="file" name="media" id="media">

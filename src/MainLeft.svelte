@@ -107,7 +107,7 @@ div.main-left{
   position: fixed;
   top: 5rem;
   width: 25vw;
-  height: 88vh;
+  height: calc(100vh - 5.5rem);
   padding: 0px 1rem;
   overflow-y: auto;
 }

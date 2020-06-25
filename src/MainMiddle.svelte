@@ -21,7 +21,7 @@ div.main-middle{
   top: 5rem;
   left: 25vw;
   width: 50vw;
-  padding: 0 2rem;
+  padding: 0 5vw;
 }
 
 </style>
