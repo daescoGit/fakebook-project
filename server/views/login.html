@@ -16,6 +16,7 @@
   <div id="incorrect"></div>
 
   <script>
+    localStorage.clear();
     if(window.location.search == '?registered'){
       document.getElementById("incorrect").innerHTML = "Registration successful!";
     }
@@ -29,14 +30,23 @@
         body:form
       })
       // grab token response and store in localStorage
-      let response = await connection.text()
-      console.log(response)
+      let response = await connection.json()
+      //console.log(typeof response)
       // 'incorrect' = res from server
       if(response == 'incorrect') {
         document.getElementById("incorrect").innerHTML = "Incorrect credentials";
       }else{
-        localStorage.jwt = response
-        location.href = "/profile"
+        localStorage.jwt = response.token
+        localStorage.uid = response.uid
+        //location.href = "/profile"
+        connection2 = await fetch("profile", {
+          method:"GET",
+          headers: {
+            'X-Custom-Header': localStorage.jwt
+          }
+        })
+        response2 = await(connection2)
+        response2 ? location.href = "/profile" : console.log('Error processing token....')
       }
     }
   </script>

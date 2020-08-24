@@ -1,6 +1,8 @@
 <script>
   import CreatePost from './CreatePost.svelte'
   import PostList from './PostList.svelte'
+  export let getTime
+  export let time
 </script>
 
 <!-- ###################################### -->
@@ -8,7 +10,7 @@
 <div class="main-middle">
 
     <CreatePost />
-    <PostList />
+    <PostList {getTime} {time}/>
 
 </div>
 
@@ -18,10 +20,10 @@
 
 div.main-middle{
   position: absolute;
-  top: 5rem;
-  left: 25vw;
+  margin: 5rem 25% 0;
+  /* left: 25vw; */
   width: 50vw;
-  padding: 0 2rem;
+  padding: 0 5vw;
 }
 
 </style>
