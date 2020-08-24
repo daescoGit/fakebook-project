@@ -6,7 +6,7 @@
     let connection = await fetch("posts", {
       method: "POST",
       headers: {
-      'X-Custom-Header': localStorage.jwt
+        'X-Custom-Header': localStorage.jwt
       },
       body: form
     })
@@ -21,12 +21,14 @@
     <div>
     <form on:submit|preventDefault id="frmNewPost">
         <input id="msg" type="text" name="message" placeholder="Hey {$jData.userName}, how's life?" autocomplete="off">
-        <!-- <input id="profilePic" type="hidden" name="profilePic" value={$jData.image}> -->
+        <input id="profilePic" type="hidden" name="profilePic" value={$jData.image}>
         <div id="optionals">
-        <label for="media" id="media-label"><i class="far fa-image photo"></i> Image/Video</label>
-        <input type="file" name="media" id="media">
-        <div><i class="fas fa-user-tag tag"></i> Tag Friend</div>
-        <div><i class="fas fa-shoe-prints feel"></i> Feeling Lucky</div>
+          <div></div>
+          <label for="media" id="media-label"><i class="far fa-image photo"></i> Image / Video</label>
+          <input type="file" name="media" id="media">
+          <div></div>
+          <!-- <div><i class="fas fa-user-tag tag"></i> Tag Friend</div>
+          <div><i class="fas fa-shoe-prints feel"></i> Feeling Lucky</div> -->
         </div>
         <button on:click={post}>Post</button>
     </form>
@@ -49,11 +51,6 @@ button {
   outline: none;
 }
 
-.create-post form input{
-  width: 100%;
-  background: rgba(0, 0, 0, 0.05);
-}
-
 button:hover {
   cursor: pointer;
 }
@@ -70,7 +67,10 @@ button:hover {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   justify-items: center;
-  padding: 0.5rem 0;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #bbbbbb;
 }
 
 .photo{

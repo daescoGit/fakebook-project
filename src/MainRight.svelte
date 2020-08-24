@@ -1,16 +1,18 @@
 <script>
     import { jData } from './store.js'
-    //import { addChatWindow } from './ChatContainer.svelte'
-    $: friends = $jData.friends
 
     let users = []
     let input = ''
     let results = []
 
+    $: friends = $jData.friends
+
     // ############ CHAT RELATED ############
 
-    const showChatWindow = (friendID) => {
-        document.getElementById(friendID).setAttribute("style", "display:block;")
+    const showChatWindow = (friend) => {
+        if(!$jData.activeChats.includes(friend)) {           
+            $jData.activeChats = [...$jData.activeChats, friend]
+        }
     }
 
     // ############ ADD FRIEND RELATED ############
@@ -18,10 +20,10 @@
     async function getUsers(){
         try{
             let connection = await fetch("get-users", {
-                method: 'POST'
+                method: 'GET'
             })
             let response = await(connection).json() 
-            // removing this user from users array
+            // removing this user from users array // alt: filter func
             let myPos = response.map(function(e) { return e._id }).indexOf($jData.userID)
             response.splice(myPos, 1)
             // removing friends from users array
@@ -41,7 +43,7 @@
 
     function checkInput(user){
         if(input == ''){return ''}
-        return user.name.includes(input)
+        return user.name.toLowerCase().includes(input.toLowerCase())
     }
 
     function searchUsers(){
@@ -50,10 +52,10 @@
     }
 
     async function requestFriend(friend){
-        let postData = [friend, 0]
+        let postData = [friend, 0, $jData.image]
         try{
             let connection = await fetch("add-friend", {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'X-Custom-Header': localStorage.jwt,
                     'X-Custom-Header-Data': JSON.stringify(postData)
@@ -67,13 +69,13 @@
         }
     }
 
+    //$: console.log($jData.onlineFriends)
 </script>
 
 <!-- ###################################### -->
 
 <div id="a" class="main-right">
-
-    <input id="add-friend" type="text" placeholder="Add a friend" bind:value={input} on:click={getUsers} on:input={searchUsers} autocomplete="off">
+    <input id="add-friend" type="text" placeholder="Find friends" bind:value={input} on:click={getUsers} on:input={searchUsers} autocomplete="off">
 
     <div id="friend-search-results">
     {#each results as result}
@@ -82,8 +84,13 @@
             <div>
                 <div>{ result.name }</div>
                 <div id="status-container">
-                    <div id="status-indicator"></div>
-                    <p id="status-text">Offline</p>
+                    {#if $jData.onlineFriends.includes(result._id)}
+                        <div class="status-indicator" id="online"></div>
+                        <p class="status-text">Online</p>
+                    {:else}
+                        <div class="status-indicator" id="offline"></div>
+                        <p class="status-text" id="offline-text">Offline</p>
+                    {/if}
                 </div>
                 <i class="fas fa-plus-circle"></i>
             </div>
@@ -92,16 +99,23 @@
     </div>
 
     {#each friends as friend}
-        <div class="mini-profile" on:click={showChatWindow(friend._id)}>
+        <div class="mini-profile" on:click={showChatWindow(friend)}>
             <img src="/media/{friend.image}" alt="">
             <div>
                 <div>{ friend.name }</div>
                 <div id="status-container">
-                    <div id="status-indicator"></div>
-                    <p id="status-text">Offline</p>
+                    {#if $jData.onlineFriends.includes(friend._id)}
+                        <div class="status-indicator" id="online"></div>
+                        <p class="status-text">Online</p>
+                    {:else}
+                        <div class="status-indicator" id="offline"></div>
+                        <p class="status-text" id="offline-text">Offline</p>
+                    {/if}
                 </div>
             </div>
         </div> 
+    {:else}
+        <p>No friends added, search above to find friends</p>
     {/each}  
 
 </div>
@@ -112,15 +126,16 @@
 
 div.main-right{
     position: fixed;
-    top: 5rem;
-    left: 75vw;
+    padding: 5rem 1rem;
+    right: 0;
     display: grid;
     grid-auto-rows: min-content;
-    width: 25vw;
-    padding-right: 1rem;
-    height: calc(100vh - 5.5rem);
+    width: 20vw;
+    /* padding-right: 1rem; */
+    height: 100vh;
     overflow-y: auto;
     /* z-index: 1; */
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.3);
 }
 
 div.mini-profile{
@@ -128,11 +143,22 @@ div.mini-profile{
     padding: 0.5rem;
 }
 
-#status-indicator{
+.status-indicator{
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 20px;
+}
+
+#offline {
     background: #f02849;
+}
+
+#online {
+    background: rgb(80, 209, 80);
+}
+
+#offline-text {
+    color: #b7b7b7;
 }
 
 #status-container{
@@ -142,26 +168,27 @@ div.mini-profile{
     grid-column-gap: 0.3rem;
 }
 
-#status-text{
-    font-size: 0.9rem;
+.status-text{
+    font-weight: 500;
+    font-size: 0.8rem;
+    color: #3c3c3c;
 }
 
 #add-friend{
     margin-bottom: 1rem;
-    width: 80%
+    width: 100%
 }
 
 #friend-search-results{
     position: absolute;
-    /* width: 100%; */
     background: #fff;
     z-index: 9999;
     border-radius: 0.3rem;
-    top: 2.5rem;
+    top: 7.5rem;
     -webkit-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
     -moz-box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
     box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.3);
-    margin: 0.3rem;
+    margin: 0 1rem;
 }
 
 .fa-plus-circle {
