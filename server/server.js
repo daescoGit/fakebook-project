@@ -38,7 +38,6 @@ mongoClient.connect(mongoUrl, { useUnifiedTopology: true }, (err, response) => {
     postsCollection = db.collection("posts")
 })
 
-
 // ANTI SERVER CRASH
 // ##################################
 process.on("uncaughtException", (err, data) => {
