@@ -45,9 +45,14 @@ process.on("uncaughtException", (err, data) => {
     if (err) { console.log("critical error, yet system keeps running", err); return }
 })
 
-app.listen(80, err => {
+let port = process.env.PORT;
+if (port == null || port == "") {
+    port = 8000;
+}
+
+app.listen(port, err => {
     if (err) { console.log('Server port issue'); return }
-    console.log('Server listening at http://localhost:' + 80)
+    console.log('Server listening at port ' + port)
 })
 
 // SIGNUP

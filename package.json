@@ -1,10 +1,14 @@
 {
   "name": "svelte-app",
   "version": "1.0.0",
+  "engines": {
+    "node": "10.19.0"
+  },
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "node backend/server.js",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install npm && run build"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "11.0.2",
@@ -16,6 +20,12 @@
     "svelte": "^3.0.0"
   },
   "dependencies": {
-    "sirv-cli": "^0.4.4"
+    "sirv-cli": "^0.4.4",
+    "detect-file-type": "0.2.8",
+    "express": "^4.17.1",
+    "formidable": "1.2.2",
+    "jsonwebtoken": "8.5.1",
+    "mongodb": "3.5.8",
+    "uuid": "8.1.0"
   }
 }
