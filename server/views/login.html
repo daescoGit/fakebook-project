@@ -1,54 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
+  <link rel='stylesheet' type="text/css" href='/static/css/auth.css'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+    integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   <title>Login</title>
 </head>
+
 <body>
-<!-- onsubmit return false = easy alt to prevent default -->
+  <div class="background-img"></div>
+  <!-- onsubmit return false = easy alt to prevent default -->
   <form id="frmLogin" onsubmit="return false">
+    <div class="logo">
+      <i class="fas fa-crow"></i> fakebook
+    </div>
     <input name="username" type="text" placeholder="username">
     <input name="password" type="password" placeholder="password">
     <button onclick="login()">log in</button>
+    <div id="incorrect"></div>
+    <p class="shift-page">Not registered yet? head over to the <a href="signup">Sign up page</a></p>
   </form>
 
-  <div id="incorrect"></div>
 
   <script>
     localStorage.clear();
-    if(window.location.search == '?registered'){
+    if (window.location.search == '?registered') {
       document.getElementById("incorrect").innerHTML = "Registration successful!";
     }
     // XSS, CSRF always escape/protect (svelte, react etc. auto escapes)
     // todo: validation
-    async function login(){
+    async function login() {
       let form = new FormData(document.querySelector("#frmLogin"))
       // async fetch: init object (form) + await res(token)
       let connection = await fetch("login", {
-        method:"POST",
-        body:form
+        method: "POST",
+        body: form
       })
       // grab token response and store in localStorage
       let response = await connection.json()
       //console.log(typeof response)
       // 'incorrect' = res from server
-      if(response == 'incorrect') {
+      if (response == 'incorrect') {
         document.getElementById("incorrect").innerHTML = "Incorrect credentials";
-      }else{
+      } else {
         localStorage.jwt = response.token
         localStorage.uid = response.uid
         //location.href = "/profile"
         connection2 = await fetch("profile", {
-          method:"GET",
+          method: "GET",
           headers: {
             'X-Custom-Header': localStorage.jwt
           }
         })
-        response2 = await(connection2)
+        response2 = await (connection2)
         response2 ? location.href = "/profile" : console.log('Error processing token....')
       }
     }
   </script>
 </body>
+
 </html>

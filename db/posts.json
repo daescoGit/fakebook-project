@@ -1,8 +1,200 @@
-{"_id":{"$oid":"5f28000848697d0c0c000300"},"userId":"5ef3b8abea0f2a431869f5f8","message":"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu egestas justo, ac ultricies ligula. Curabitur ac sollicitudin nulla. Donec nec magna sit amet nibh rutrum accumsan. Nulla facilisi. ","name":"Dan","mediaName":"","comments":[{"_id":{"$oid":"5f2829c99c14763534a66e7b"},"userId":"5ef3b956ea0f2a431869f5fd","message":"huehue","name":"Olga","likes":[],"profilePic":"40a28eb0-d4d1-11ea-823f-3dd99eae25ec.jpg"},{"_id":{"$oid":"5f28001548697d0c0c000301"},"userId":"5ef44b1e6ea5a90ef88602d9","message":"whatup","name":"George","likes":[{"userId":"5ef3b8abea0f2a431869f5f8"}],"profilePic":"5e559300-d583-11ea-a643-0d06768c82af.jpg"}],"likes":[{"userId":"5ef44b1e6ea5a90ef88602d9"}],"profilePic":"9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"}
-{"_id":{"$oid":"5f28002c48697d0c0c000302"},"userId":"5ef44b1e6ea5a90ef88602d9","message":"something interesting","name":"George","mediaName":"","comments":[],"likes":[],"profilePic":"5e559300-d583-11ea-a643-0d06768c82af.jpg"}
-{"_id":{"$oid":"5f2808719c14763534a66e64"},"userId":"5ef3b908ea0f2a431869f5fb","message":"Article concerning thing and stuff","name":"John","mediaName":"1fb67060-d588-11ea-9214-e1721c8dd316.jpg","comments":[{"_id":{"$oid":"5f29211344c2b2084ccb52b4"},"userId":"5ef3b8abea0f2a431869f5f8","message":"fascinating","name":"Dan","likes":[],"profilePic":"9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"}],"likes":[{"userId":"5ef3b8abea0f2a431869f5f8"}],"profilePic":"1f071fa0-d23d-11ea-801f-9df95ed3451d.jpg"}
-{"_id":{"$oid":"5f28134c9c14763534a66e6e"},"userId":"5f26a27c782dda2f5ca02a45","message":"hi","name":"Lucy","mediaName":"","comments":[],"likes":[],"profilePic":"ec59bde0-d630-11ea-9196-15f1568e4254.jpg"}
-{"_id":{"$oid":"5f29236244c2b2084ccb52b6"},"userId":"5ef3b8e6ea0f2a431869f5fa","message":"Just doin' Bob things","name":"Bob","mediaName":"","comments":[{"_id":{"$oid":"5f2a70a6736a2727fce11e7b"},"userId":"5ef3b8abea0f2a431869f5f8","message":"cool","name":"Dan","likes":[],"profilePic":"9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"}],"likes":[{"userId":"5ef3b990ea0f2a431869f5fe"},{"userId":"5ef3b8abea0f2a431869f5f8"}],"profilePic":"b3cabf40-d56a-11ea-9799-a71b7a22a828.jpg"}
-{"_id":{"$oid":"5f29262644c2b2084ccb52b8"},"userId":"5ef3b990ea0f2a431869f5fe","message":"They looked up at the sky and saw a million stars.","name":"Chris","mediaName":"","comments":[{"_id":{"$oid":"5f29341544c2b2084ccb52c8"},"userId":"5f26a27c782dda2f5ca02a45","message":"how about that","name":"Lucy","likes":[],"profilePic":"ec59bde0-d630-11ea-9196-15f1568e4254.jpg"},{"_id":{"$oid":"5f29262f44c2b2084ccb52b9"},"userId":"5ef3b956ea0f2a431869f5fd","message":"yup","name":"Olga","likes":[{"userId":"5ef3b908ea0f2a431869f5fb"},{"userId":"5f26a27c782dda2f5ca02a45"},{"userId":"5ef3b990ea0f2a431869f5fe"}],"profilePic":"40a28eb0-d4d1-11ea-823f-3dd99eae25ec.jpg"}],"likes":[],"profilePic":"2f45f6c0-d56c-11ea-a608-ab846c9fae08.jpg"}
-{"_id":{"$oid":"5f29340e44c2b2084ccb52c7"},"userId":"5f26a27c782dda2f5ca02a45","message":"Three years later, the coffin was still full of Jello.","name":"Lucy","mediaName":"","comments":[{"_id":{"$oid":"5f2a8abb736a2727fce11e7e"},"userId":"5ef3b990ea0f2a431869f5fe","message":"f","name":"Chris","likes":[],"profilePic":"2f45f6c0-d56c-11ea-a608-ab846c9fae08.jpg"}],"likes":[],"profilePic":"ec59bde0-d630-11ea-9196-15f1568e4254.jpg"}
-{"_id":{"$oid":"600ec2632664352f606d83f5"},"userId":"5ef3b8abea0f2a431869f5f8","message":"hi","name":"Dan","mediaName":"","comments":[],"likes":[],"profilePic":"9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"}
+{
+  "_id": {
+    "$oid": "5f28000848697d0c0c000300"
+  },
+  "userId": "5ef3b8abea0f2a431869f5f8",
+  "message": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec eu egestas justo, ac ultricies ligula. Curabitur ac sollicitudin nulla. Donec nec magna sit amet nibh rutrum accumsan. Nulla facilisi. ",
+  "name": "Dan",
+  "mediaName": "",
+  "comments": [
+    {
+      "_id": {
+        "$oid": "5f2829c99c14763534a66e7b"
+      },
+      "userId": "5ef3b956ea0f2a431869f5fd",
+      "message": "huehue",
+      "name": "Olga",
+      "likes": [],
+      "profilePic": "40a28eb0-d4d1-11ea-823f-3dd99eae25ec.jpg"
+    },
+    {
+      "_id": {
+        "$oid": "5f28001548697d0c0c000301"
+      },
+      "userId": "5ef44b1e6ea5a90ef88602d9",
+      "message": "whatup",
+      "name": "George",
+      "likes": [
+        {
+          "userId": "5ef3b8abea0f2a431869f5f8"
+        }
+      ],
+      "profilePic": "5e559300-d583-11ea-a643-0d06768c82af.jpg"
+    }
+  ],
+  "likes": [
+    {
+      "userId": "5ef44b1e6ea5a90ef88602d9"
+    }
+  ],
+  "profilePic": "9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f28002c48697d0c0c000302"
+  },
+  "userId": "5ef44b1e6ea5a90ef88602d9",
+  "message": "something interesting",
+  "name": "George",
+  "mediaName": "",
+  "comments": [],
+  "likes": [],
+  "profilePic": "5e559300-d583-11ea-a643-0d06768c82af.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f2808719c14763534a66e64"
+  },
+  "userId": "5ef3b908ea0f2a431869f5fb",
+  "message": "Article concerning thing and stuff",
+  "name": "John",
+  "mediaName": "1fb67060-d588-11ea-9214-e1721c8dd316.jpg",
+  "comments": [
+    {
+      "_id": {
+        "$oid": "5f29211344c2b2084ccb52b4"
+      },
+      "userId": "5ef3b8abea0f2a431869f5f8",
+      "message": "fascinating",
+      "name": "Dan",
+      "likes": [],
+      "profilePic": "9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"
+    }
+  ],
+  "likes": [
+    {
+      "userId": "5ef3b8abea0f2a431869f5f8"
+    }
+  ],
+  "profilePic": "1f071fa0-d23d-11ea-801f-9df95ed3451d.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f28134c9c14763534a66e6e"
+  },
+  "userId": "5f26a27c782dda2f5ca02a45",
+  "message": "hi",
+  "name": "Lucy",
+  "mediaName": "",
+  "comments": [],
+  "likes": [],
+  "profilePic": "ec59bde0-d630-11ea-9196-15f1568e4254.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f29236244c2b2084ccb52b6"
+  },
+  "userId": "5ef3b8e6ea0f2a431869f5fa",
+  "message": "Just doin' Bob things",
+  "name": "Bob",
+  "mediaName": "",
+  "comments": [
+    {
+      "_id": {
+        "$oid": "5f2a70a6736a2727fce11e7b"
+      },
+      "userId": "5ef3b8abea0f2a431869f5f8",
+      "message": "cool",
+      "name": "Dan",
+      "likes": [],
+      "profilePic": "9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"
+    }
+  ],
+  "likes": [
+    {
+      "userId": "5ef3b990ea0f2a431869f5fe"
+    },
+    {
+      "userId": "5ef3b8abea0f2a431869f5f8"
+    }
+  ],
+  "profilePic": "b3cabf40-d56a-11ea-9799-a71b7a22a828.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f29262644c2b2084ccb52b8"
+  },
+  "userId": "5ef3b990ea0f2a431869f5fe",
+  "message": "They looked up at the sky and saw a million stars.",
+  "name": "Chris",
+  "mediaName": "",
+  "comments": [
+    {
+      "_id": {
+        "$oid": "5f29341544c2b2084ccb52c8"
+      },
+      "userId": "5f26a27c782dda2f5ca02a45",
+      "message": "how about that",
+      "name": "Lucy",
+      "likes": [],
+      "profilePic": "ec59bde0-d630-11ea-9196-15f1568e4254.jpg"
+    },
+    {
+      "_id": {
+        "$oid": "5f29262f44c2b2084ccb52b9"
+      },
+      "userId": "5ef3b956ea0f2a431869f5fd",
+      "message": "yup",
+      "name": "Olga",
+      "likes": [
+        {
+          "userId": "5ef3b908ea0f2a431869f5fb"
+        },
+        {
+          "userId": "5f26a27c782dda2f5ca02a45"
+        },
+        {
+          "userId": "5ef3b990ea0f2a431869f5fe"
+        }
+      ],
+      "profilePic": "40a28eb0-d4d1-11ea-823f-3dd99eae25ec.jpg"
+    }
+  ],
+  "likes": [],
+  "profilePic": "2f45f6c0-d56c-11ea-a608-ab846c9fae08.jpg"
+}
+{
+  "_id": {
+    "$oid": "5f29340e44c2b2084ccb52c7"
+  },
+  "userId": "5f26a27c782dda2f5ca02a45",
+  "message": "Three years later, the coffin was still full of Jello.",
+  "name": "Lucy",
+  "mediaName": "",
+  "comments": [
+    {
+      "_id": {
+        "$oid": "5f2a8abb736a2727fce11e7e"
+      },
+      "userId": "5ef3b990ea0f2a431869f5fe",
+      "message": "f",
+      "name": "Chris",
+      "likes": [],
+      "profilePic": "2f45f6c0-d56c-11ea-a608-ab846c9fae08.jpg"
+    }
+  ],
+  "likes": [],
+  "profilePic": "ec59bde0-d630-11ea-9196-15f1568e4254.jpg"
+}
+{
+  "_id": {
+    "$oid": "600ec2632664352f606d83f5"
+  },
+  "userId": "5ef3b8abea0f2a431869f5f8",
+  "message": "hi",
+  "name": "Dan",
+  "mediaName": "",
+  "comments": [],
+  "likes": [],
+  "profilePic": "9a7cfec0-d706-11ea-aa6f-1d6cf97273d9.jpg"
+}
