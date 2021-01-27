@@ -1,21 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <link rel='stylesheet' type="text/css" href='/static/css/auth.css'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Signup</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+        integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <title>Sign up</title>
 </head>
+
 <body>
+    <div class="background-img"></div>
     <form action="signup" method="POST">
+        <div class="logo">
+            <i class="fas fa-crow"></i> fakebook
+        </div>
         <input name="username" type="text" placeholder="Username">
         <input name="password" type="password" placeholder="Password">
         <input name="email" type="email" placeholder="Email">
         <button>Sign up</button>
+        <p class="shift-page">Take me back to the <a href="login">Log in page</a></p>
     </form>
-    
+
     <script>
         // todo: validate input, check if username is taken etc.
     </script>
 </body>
-</html>
 
+</html>
